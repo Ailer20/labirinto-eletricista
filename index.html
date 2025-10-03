@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Labirinto do Eletricista</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Cabeçalho do jogo -->
+        <header class="game-header">
+            <h1>🔌 O Labirinto do Eletricista</h1>
+            <div class="game-info">
+                <div class="score">Pontuação: <span id="score">0</span></div>
+                <div class="timer">Tempo: <span id="timer">00:00</span></div>
+                <div class="moves">Movimentos: <span id="moves">0</span></div>
+            </div>
+        </header>
+
+        <!-- Área principal do jogo -->
+        <main class="game-main">
+            <!-- Labirinto -->
+            <div class="maze-container">
+                <div id="maze" class="maze"></div>
+            </div>
+
+            <!-- Controles para dispositivos móveis -->
+            <div class="mobile-controls">
+                <div class="control-row">
+                    <button id="up-btn" class="control-btn">↑</button>
+                </div>
+                <div class="control-row">
+                    <button id="left-btn" class="control-btn">←</button>
+                    <button id="down-btn" class="control-btn">↓</button>
+                    <button id="right-btn" class="control-btn">→</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Painel lateral com informações -->
+        <aside class="game-sidebar">
+            <div class="objective">
+                <h3>🎯 Objetivo</h3>
+                <p>Leve o eletricista até o psicólogo evitando as distrações!</p>
+            </div>
+            
+            <div class="legend">
+                <h3>📋 Legenda</h3>
+                <div class="legend-item">
+                    <span class="legend-icon player">🔌</span>
+                    <span>Eletricista (Você)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon target">🧠</span>
+                    <span>Psicólogo (Objetivo)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon distraction">🍺</span>
+                    <span>Distrações (Evite!)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon wall">⬛</span>
+                    <span>Parede</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon path">⬜</span>
+                    <span>Caminho</span>
+                </div>
+            </div>
+
+            <div class="game-actions">
+                <button id="restart-btn" class="action-btn">🔄 Reiniciar</button>
+                <button id="pause-btn" class="action-btn">⏸️ Pausar</button>
+            </div>
+        </aside>
+
+        <!-- Modal de Game Over -->
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-title">Game Over!</h2>
+                <p id="modal-message">Você foi distraído! Tente novamente.</p>
+                <div class="modal-stats">
+                    <p>Pontuação Final: <span id="final-score">0</span></p>
+                    <p>Tempo: <span id="final-time">00:00</span></p>
+                    <p>Movimentos: <span id="final-moves">0</span></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="play-again-btn" class="action-btn primary">🎮 Jogar Novamente</button>
+                    <button id="close-modal-btn" class="action-btn">❌ Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Vitória -->
+        <div id="victory-modal" class="modal hidden">
+            <div class="modal-content victory">
+                <h2>🎉 Parabéns!</h2>
+                <p>Você conseguiu levar o eletricista ao psicólogo!</p>
+                <div class="modal-stats">
+                    <p>Pontuação Final: <span id="victory-score">0</span></p>
+                    <p>Tempo: <span id="victory-time">00:00</span></p>
+                    <p>Movimentos: <span id="victory-moves">0</span></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="next-level-btn" class="action-btn primary">⬆️ Próximo Nível</button>
+                    <button id="restart-victory-btn" class="action-btn">🔄 Jogar Novamente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Pausa -->
+        <div id="pause-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>⏸️ Jogo Pausado</h2>
+                <p>O jogo está pausado. Clique em continuar para retomar.</p>
+                <div class="modal-actions">
+                    <button id="resume-btn" class="action-btn primary">▶️ Continuar</button>
+                    <button id="restart-pause-btn" class="action-btn">🔄 Reiniciar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instruções para desktop -->
+    <div class="desktop-instructions">
+        <p>💡 Use as setas do teclado para mover o eletricista</p>
+    </div>
+
+    <script src="sounds.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
