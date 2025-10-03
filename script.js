@@ -17,6 +17,7 @@ class MazeGame {
         this.soundManager = new SoundManager();
         this.particleSystem = new ParticleSystem();
         this.achievementSystem = new AchievementSystem();
+        this.gamepadManager = new GamepadManager(this);
         
         // Elementos DOM
         this.mazeElement = document.getElementById('maze');
@@ -134,16 +135,15 @@ class MazeGame {
     addStaticDistractions() {
         // Posições das distrações baseadas na imagem de referência 16x12
         const staticDistractions = [
-            { x: 8, y: 1, type: '🍺' },   
+            { x: 8, y: 1, type: '💰' },   
             { x: 2, y: 3, type: '🍺' },   
             { x: 7, y: 3, type: '🎉' },   
-            { x: 4, y: 7, type: '🎉' },  
-            { x: 12, y: 3, type: '🍺' },  
-            { x: 2, y: 5, type: '🎉' },   
-            { x: 6, y: 5, type: '🍺' },  
+            { x: 12, y: 3, type: '💰' },  
+            { x: 2, y: 5, type: '🎵' },   
+            { x: 6, y: 5, type: '🎉' },  
             { x: 8, y: 5, type: '🎉' },   
-            { x: 12, y: 6, type: '🍺' },  
-            { x: 2, y: 8, type: '🎉' },  
+            { x: 12, y: 6, type: '💰' },  
+            { x: 2, y: 8, type: '🍺' },  
             { x: 6, y: 9, type: '🍺' },  
             { x: 12, y: 10, type: '🍺' },
         ];
@@ -289,6 +289,11 @@ class MazeGame {
         document.getElementById("restart-victory-btn").removeEventListener("click", this.handleRestartClickBound);
         document.getElementById("resume-btn").removeEventListener("click", this.handleResumeClickBound);
         document.getElementById("restart-pause-btn").removeEventListener("click", this.handleRestartClickBound);
+        
+        // Limpa o gamepad manager se necessário
+        if (this.gamepadManager) {
+            this.gamepadManager.destroy();
+        }
     }
 
     // Configura os event listeners
@@ -304,6 +309,11 @@ class MazeGame {
         this.handleResumeClickBound = this.togglePause.bind(this);
         this.handleNextLevelClickBound = this.nextLevel.bind(this);
         this.handleCloseModalBound = this.hideModal.bind(this, this.gameOverModal);
+        
+        // Recria o gamepad manager se necessário
+        if (!this.gamepadManager || !this.gamepadManager.isPolling) {
+            this.gamepadManager = new GamepadManager(this);
+        }
 
         // Controles do teclado
         document.addEventListener('keydown', this.handleKeyDownBound);
@@ -594,7 +604,7 @@ class MazeGame {
 
 // Inicializa o jogo quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-    new MazeGame();
+    window.game = new MazeGame();
 });
 
 // Previne zoom em dispositivos móveis
