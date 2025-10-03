@@ -66,14 +66,14 @@ class GamepadManager {
         
         // Atribui automaticamente o controle ao próximo jogador disponível
         const playerNumber = this.assignGamepadToPlayer(event.gamepad.index);
-        this.showGamepadNotification(Controle ${playerNumber} conectado: ${event.gamepad.id}, 'success');
+        this.showGamepadNotification(`Controle ${playerNumber} conectado: ${event.gamepad.id}`, 'success');
     }
     
     onGamepadDisconnected(event) {
         console.log('Gamepad desconectado:', event.gamepad.id);
         const playerNumber = this.gamepadAssignments[event.gamepad.index];
         this.removeGamepad(event.gamepad);
-        this.showGamepadNotification(Controle ${playerNumber} desconectado: ${event.gamepad.id}, 'warning');
+        this.showGamepadNotification(`Controle ${playerNumber} desconectado: ${event.gamepad.id}`, 'warning');
     }
     
     addGamepad(gamepad) {
@@ -153,7 +153,7 @@ class GamepadManager {
     processButtons(gamepad) {
         for (let i = 0; i < gamepad.buttons.length; i++) {
             const button = gamepad.buttons[i];
-            const buttonName = this.buttonMap[i] || Button${i};
+            const buttonName = this.buttonMap[i] || `Button${i}`;
             const wasPressed = this.buttonPressed[gamepad.index][i] || false;
             const isPressed = button.pressed;
             
@@ -233,7 +233,7 @@ class GamepadManager {
                 // Botão Y pode ser usado para outras funções
                 break;
             default:
-                console.log(Botão ${buttonName} pressionado no gamepad ${gamepadIndex} (Jogador ${playerNumber}));
+                console.log(`Botão ${buttonName} pressionado no gamepad ${gamepadIndex} (Jogador ${playerNumber})`);
         }
     }
     
@@ -321,7 +321,7 @@ class GamepadManager {
     showGamepadNotification(message, type = 'info') {
         // Cria uma notificação visual para feedback do gamepad
         const notification = document.createElement('div');
-        notification.className = gamepad-notification ${type};
+        notification.className = `gamepad-notification ${type}`;
         notification.textContent = message;
         
         // Estilos inline para a notificação

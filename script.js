@@ -195,7 +195,7 @@ class MazeGame {
     hasValidPath(startX, startY, targetX, targetY, currentMaze, avoidDistractions = false) {
         const queue = [{ x: startX, y: startY }];
         const visited = new Set();
-        visited.add(${startX},${startY});
+        visited.add(`${startX},${startY}`);
 
         while (queue.length > 0) {
             const { x, y } = queue.shift();
@@ -220,8 +220,8 @@ class MazeGame {
 
                 if (this.isValidCell(newX, newY) && 
                     (cellType === 'path' || cellType === 'target') &&
-                    !visited.has(${newX},${newY})) {
-                    visited.add(${newX},${newY});
+                    !visited.has(`${newX},${newY}`)) {
+                    visited.add(`${newX},${newY}`);
                     queue.push({ x: newX, y: newY });
                 }
             }
@@ -232,7 +232,7 @@ class MazeGame {
     // Encontra o número de caminhos distintos do início ao fim usando BFS
     countDistinctPaths(startX, startY, targetX, targetY, currentMaze, avoidDistractions = false) {
         let pathCount = 0;
-        const queue = [{ x: startX, y: startY, path: new Set([${startX},${startY}]) }];
+        const queue = [{ x: startX, y: startY, path: new Set([`${startX},${startY}`]) }];
         const maxPathsToCount = 10; // Limita o número de caminhos para evitar sobrecarga
 
         while (queue.length > 0 && pathCount < maxPathsToCount) {
@@ -251,7 +251,7 @@ class MazeGame {
             for (const { dx, dy } of neighbors) {
                 const newX = x + dx;
                 const newY = y + dy;
-                const newKey = ${newX},${newY};
+                const newKey = `${newX},${newY}`;
 
                 let cellType = currentMaze[newY][newX];
                 if (avoidDistractions && cellType === 'distraction') {
@@ -273,22 +273,22 @@ class MazeGame {
     // Renderiza o labirinto no DOM
     renderMaze() {
         this.mazeElement.innerHTML = '';
-        this.mazeElement.style.gridTemplateColumns = repeat(${this.mazeWidth}, 1fr);
+        this.mazeElement.style.gridTemplateColumns = `repeat(${this.mazeWidth}, 1fr)`;
         
         for (let y = 0; y < this.mazeHeight; y++) {
             for (let x = 0; x < this.mazeWidth; x++) {
                 const cell = document.createElement('div');
-                cell.className = maze-cell ${this.maze[y][x]};
+                cell.className = `maze-cell ${this.maze[y][x]}`;
                 cell.dataset.x = x;
                 cell.dataset.y = y;
                 
                 // Adiciona ícones
                 switch (this.maze[y][x]) {
                     case 'player':
-                        cell.textContent = '👷‍♂';
+                        cell.textContent = '👷‍♂️';
                         break;
                     case 'player2':
-                        cell.textContent = '👷‍♀';
+                        cell.textContent = '👷‍♀️';
                         break;
                     case 'target':
                         cell.textContent = '🧠';
@@ -574,7 +574,7 @@ class MazeGame {
                 const minutes = Math.floor(seconds / 60);
                 const displaySeconds = seconds % 60;
                 this.timerElement.textContent = 
-                    ${String(minutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')};
+                    `${String(minutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`;
             }
         }, 100);
     }
@@ -596,7 +596,7 @@ class MazeGame {
         this.soundManager.play('victory');
         
         // Cria explosão de partículas na posição do jogador
-        const playerCell = document.querySelector([data-x="${this.playerPos.x}"][data-y="${this.playerPos.y}"]);
+        const playerCell = document.querySelector(`[data-x="${this.playerPos.x}"][data-y="${this.playerPos.y}"]`);
         if (playerCell) {
             const rect = playerCell.getBoundingClientRect();
             this.particleSystem.createExplosion(
@@ -641,7 +641,7 @@ class MazeGame {
         
         // Cria explosão de partículas na posição do jogador
         const currentPos = player === 1 ? this.playerPos : this.player2Pos;
-        const playerCell = document.querySelector([data-x="${currentPos.x}"][data-y="${currentPos.y}"]);
+        const playerCell = document.querySelector(`[data-x="${currentPos.x}"][data-y="${currentPos.y}"]`);
         if (playerCell) {
             const rect = playerCell.getBoundingClientRect();
             this.particleSystem.createExplosion(
@@ -655,7 +655,7 @@ class MazeGame {
         let message = 'Tente novamente!';
         if (reason === 'distraction') {
             if (this.gameMode === 'multiplayer') {
-                message = Jogador ${player} foi distraído! Foquem no objetivo.;
+                message = `Jogador ${player} foi distraído! Foquem no objetivo.`;
             } else {
                 message = 'Você foi distraído! Foque no objetivo.';
             }
