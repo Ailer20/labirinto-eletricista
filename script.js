@@ -134,15 +134,16 @@ class MazeGame {
     addStaticDistractions() {
         // Posições das distrações baseadas na imagem de referência 16x12
         const staticDistractions = [
-            { x: 8, y: 1, type: '💰' },   
+            { x: 8, y: 1, type: '🍺' },   
             { x: 2, y: 3, type: '🍺' },   
             { x: 7, y: 3, type: '🎉' },   
-            { x: 12, y: 3, type: '💰' },  
-            { x: 2, y: 5, type: '🎵' },   
-            { x: 6, y: 5, type: '🎉' },  
+            { x: 4, y: 7, type: '🎉' },  
+            { x: 12, y: 3, type: '🍺' },  
+            { x: 2, y: 5, type: '🎉' },   
+            { x: 6, y: 5, type: '🍺' },  
             { x: 8, y: 5, type: '🎉' },   
-            { x: 12, y: 6, type: '💰' },  
-            { x: 2, y: 8, type: '🍺' },  
+            { x: 12, y: 6, type: '🍺' },  
+            { x: 2, y: 8, type: '🎉' },  
             { x: 6, y: 9, type: '🍺' },  
             { x: 12, y: 10, type: '🍺' },
         ];
@@ -282,10 +283,12 @@ class MazeGame {
         document.getElementById("right-btn").removeEventListener("click", this.handleRightClickBound);
         document.getElementById("restart-btn").removeEventListener("click", this.handleRestartClickBound);
         document.getElementById("pause-btn").removeEventListener("click", this.handlePauseClickBound);
-        document.getElementById("resume-btn").removeEventListener("click", this.handleResumeClickBound);
+        document.getElementById("play-again-btn").removeEventListener("click", this.handleRestartClickBound);
+        document.getElementById("close-modal-btn").removeEventListener("click", this.handleCloseModalBound);
         document.getElementById("next-level-btn").removeEventListener("click", this.handleNextLevelClickBound);
-        document.getElementById("restart-gameover-btn").removeEventListener("click", this.handleRestartClickBound);
         document.getElementById("restart-victory-btn").removeEventListener("click", this.handleRestartClickBound);
+        document.getElementById("resume-btn").removeEventListener("click", this.handleResumeClickBound);
+        document.getElementById("restart-pause-btn").removeEventListener("click", this.handleRestartClickBound);
     }
 
     // Configura os event listeners
@@ -531,25 +534,32 @@ class MazeGame {
     
     // Reinicia o jogo
     restartGame() {
+        // Remove event listeners antigos para evitar duplicação
+        this.removeEventListeners();
+
         this.gameState = 'playing';
         this.score = 0;
         this.moves = 0;
         this.elapsedTime = 0;
         
         // Verifica conquista de persistência
-        this.achievementSystem.checkAchievement('gameStart');
+        this.achievementSystem.checkAchievement("gameStart");
         
         // Remove classes de estado
-        document.body.classList.remove('game-over', 'victory', 'game-paused');
+        document.body.classList.remove("game-over", "victory", "game-paused");
         
         // Esconde modais
         this.hideModal(this.gameOverModal);
         this.hideModal(this.victoryModal);
         this.hideModal(this.pauseModal);
+
+
         
         // Para timer anterior e remove event listeners antigos
         this.stopTimer();
-        this.removeEventListeners();
+
+        // Reconfigura os event listeners para os novos elementos (se houver) ou para garantir que estejam ativos
+        this.setupEventListeners();
         
         // Regenera o labirinto
         this.generateMaze();
