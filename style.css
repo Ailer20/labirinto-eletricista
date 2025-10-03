@@ -446,3 +446,148 @@ body {
 .victory .maze-cell.player {
     animation: victoryPulse 1.5s infinite;
 }
+
+/* Tela de seleção de modo */
+.mode-selection {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.mode-selection-content {
+    text-align: center;
+    color: white;
+    max-width: 600px;
+    padding: 40px;
+}
+
+.mode-selection-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.mode-selection-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 20px;
+    padding: 30px 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    min-width: 200px;
+}
+
+.mode-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    background: white;
+}
+
+.mode-icon {
+    font-size: 4rem;
+}
+
+.mode-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.mode-description {
+    font-size: 1rem;
+    color: #718096;
+}
+
+.mode-hint {
+    font-size: 1rem;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Estilos para jogador 2 */
+.maze-cell.player2 {
+    background: #9f7aea;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 15px rgba(159, 122, 234, 0.5);
+}
+
+.legend-icon.player2 { 
+    background: #9f7aea; 
+}
+
+/* Controles do jogador 2 */
+.control-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-section h4 {
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.mobile-controls {
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+}
+
+/* Responsividade para seleção de modo */
+@media (max-width: 768px) {
+    .mode-selection-content h1 {
+        font-size: 2rem;
+    }
+
+    .mode-selection-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .mode-buttons {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .mode-btn {
+        min-width: 100%;
+        padding: 25px 30px;
+    }
+
+    .mode-icon {
+        font-size: 3rem;
+    }
+
+    .mobile-controls {
+        flex-direction: column;
+        gap: 20px;
+    }
+}

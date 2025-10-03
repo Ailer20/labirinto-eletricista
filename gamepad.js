@@ -3,10 +3,13 @@ class GamepadManager {
     constructor(game) {
         this.game = game;
         this.gamepads = {};
+        this.gamepadAssignments = {}; // Mapeia gamepad index para player (1 ou 2)
         this.isPolling = false;
         this.pollInterval = null;
         this.deadzone = 0.3; // Zona morta para analógicos
         this.buttonPressed = {}; // Rastreia botões pressionados para evitar repetição
+        this.analogMoveDelay = {}; // Delay para movimento analógico
+        this.analogMoveThreshold = 200; // ms entre movimentos analógicos
         
         // Mapeamento de botões para controle Xbox
         this.buttonMap = {
@@ -60,24 +63,56 @@ class GamepadManager {
     onGamepadConnected(event) {
         console.log('Gamepad conectado:', event.gamepad.id);
         this.addGamepad(event.gamepad);
-        this.showGamepadNotification(`Controle conectado: ${event.gamepad.id}`, 'success');
+        
+        // Atribui automaticamente o controle ao próximo jogador disponível
+        const playerNumber = this.assignGamepadToPlayer(event.gamepad.index);
+        this.showGamepadNotification(Controle ${playerNumber} conectado: ${event.gamepad.id}, 'success');
     }
     
     onGamepadDisconnected(event) {
         console.log('Gamepad desconectado:', event.gamepad.id);
+        const playerNumber = this.gamepadAssignments[event.gamepad.index];
         this.removeGamepad(event.gamepad);
-        this.showGamepadNotification(`Controle desconectado: ${event.gamepad.id}`, 'warning');
+        this.showGamepadNotification(Controle ${playerNumber} desconectado: ${event.gamepad.id}, 'warning');
     }
     
     addGamepad(gamepad) {
         this.gamepads[gamepad.index] = gamepad;
         // Inicializa o estado dos botões para este gamepad
         this.buttonPressed[gamepad.index] = {};
+        this.analogMoveDelay[gamepad.index] = {
+            lastMoveTime: 0,
+            lastDirection: null
+        };
     }
     
     removeGamepad(gamepad) {
         delete this.gamepads[gamepad.index];
         delete this.buttonPressed[gamepad.index];
+        delete this.gamepadAssignments[gamepad.index];
+        delete this.analogMoveDelay[gamepad.index];
+    }
+    
+    assignGamepadToPlayer(gamepadIndex) {
+        // Se já está atribuído, retorna o jogador existente
+        if (this.gamepadAssignments[gamepadIndex]) {
+            return this.gamepadAssignments[gamepadIndex];
+        }
+        
+        // Atribui ao primeiro jogador disponível
+        const assignedPlayers = Object.values(this.gamepadAssignments);
+        
+        if (!assignedPlayers.includes(1)) {
+            this.gamepadAssignments[gamepadIndex] = 1;
+            return 1;
+        } else if (!assignedPlayers.includes(2) && this.game.gameMode === 'multiplayer') {
+            this.gamepadAssignments[gamepadIndex] = 2;
+            return 2;
+        } else {
+            // Se ambos os jogadores já têm controles, atribui ao jogador 1 por padrão
+            this.gamepadAssignments[gamepadIndex] = 1;
+            return 1;
+        }
     }
     
     startPolling() {
@@ -118,7 +153,7 @@ class GamepadManager {
     processButtons(gamepad) {
         for (let i = 0; i < gamepad.buttons.length; i++) {
             const button = gamepad.buttons[i];
-            const buttonName = this.buttonMap[i] || `Button${i}`;
+            const buttonName = this.buttonMap[i] || Button${i};
             const wasPressed = this.buttonPressed[gamepad.index][i] || false;
             const isPressed = button.pressed;
             
@@ -158,18 +193,21 @@ class GamepadManager {
         // Só processa se o jogo estiver no estado correto
         if (!this.game) return;
         
+        // Determina qual jogador está usando este controle
+        const playerNumber = this.gamepadAssignments[gamepadIndex] || 1;
+        
         switch (buttonName) {
             case 'Up':
-                this.game.movePlayer(0, -1);
+                this.game.movePlayer(0, -1, playerNumber);
                 break;
             case 'Down':
-                this.game.movePlayer(0, 1);
+                this.game.movePlayer(0, 1, playerNumber);
                 break;
             case 'Left':
-                this.game.movePlayer(-1, 0);
+                this.game.movePlayer(-1, 0, playerNumber);
                 break;
             case 'Right':
-                this.game.movePlayer(1, 0);
+                this.game.movePlayer(1, 0, playerNumber);
                 break;
             case 'A':
                 // Botão A pode ser usado para confirmar/selecionar
@@ -195,7 +233,7 @@ class GamepadManager {
                 // Botão Y pode ser usado para outras funções
                 break;
             default:
-                console.log(`Botão ${buttonName} pressionado no gamepad ${gamepadIndex}`);
+                console.log(Botão ${buttonName} pressionado no gamepad ${gamepadIndex} (Jogador ${playerNumber}));
         }
     }
     
@@ -204,21 +242,45 @@ class GamepadManager {
         // Só processa se o jogo estiver no estado correto
         if (!this.game || this.game.gameState !== 'playing') return;
         
+        // Determina qual jogador está usando este controle
+        const playerNumber = this.gamepadAssignments[gamepadIndex] || 1;
+        
+        // Verifica delay para evitar movimentos muito rápidos
+        const now = Date.now();
+        const delay = this.analogMoveDelay[gamepadIndex];
+        
         // Determina a direção predominante
+        let direction = null;
+        let dx = 0, dy = 0;
+        
         if (Math.abs(x) > Math.abs(y)) {
             // Movimento horizontal
             if (x > this.deadzone) {
-                this.game.movePlayer(1, 0); // Direita
+                direction = 'right';
+                dx = 1;
             } else if (x < -this.deadzone) {
-                this.game.movePlayer(-1, 0); // Esquerda
+                direction = 'left';
+                dx = -1;
             }
         } else {
             // Movimento vertical
             if (y > this.deadzone) {
-                this.game.movePlayer(0, 1); // Baixo
+                direction = 'down';
+                dy = 1;
             } else if (y < -this.deadzone) {
-                this.game.movePlayer(0, -1); // Cima
+                direction = 'up';
+                dy = -1;
             }
+        }
+        
+        // Só move se passou tempo suficiente desde o último movimento
+        // ou se mudou de direção
+        if (direction && 
+            (now - delay.lastMoveTime > this.analogMoveThreshold || 
+             direction !== delay.lastDirection)) {
+            this.game.movePlayer(dx, dy, playerNumber);
+            delay.lastMoveTime = now;
+            delay.lastDirection = direction;
         }
     }
     
@@ -259,7 +321,7 @@ class GamepadManager {
     showGamepadNotification(message, type = 'info') {
         // Cria uma notificação visual para feedback do gamepad
         const notification = document.createElement('div');
-        notification.className = `gamepad-notification ${type}`;
+        notification.className = gamepad-notification ${type};
         notification.textContent = message;
         
         // Estilos inline para a notificação
@@ -313,6 +375,7 @@ class GamepadManager {
         return Object.values(this.gamepads).map(gamepad => ({
             id: gamepad.id,
             index: gamepad.index,
+            player: this.gamepadAssignments[gamepad.index],
             connected: gamepad.connected,
             buttons: gamepad.buttons.length,
             axes: gamepad.axes.length
@@ -329,6 +392,8 @@ class GamepadManager {
         this.stopPolling();
         this.gamepads = {};
         this.buttonPressed = {};
+        this.gamepadAssignments = {};
+        this.analogMoveDelay = {};
     }
 }
 

@@ -1,8 +1,13 @@
+// Variável global para armazenar o modo de jogo
+let gameMode = null;
+
 // Classe principal do jogo
 class MazeGame {
-    constructor() {
+    constructor(mode = 'singleplayer') {
+        this.gameMode = mode;
         this.maze = [];
         this.playerPos = { x: 0, y: 0 };
+        this.player2Pos = { x: 0, y: 0 };
         this.targetPos = { x: 0, y: 0 };
         this.distractions = [];
         this.gameState = 'playing'; // 'playing', 'paused', 'gameOver', 'victory'
@@ -12,6 +17,8 @@ class MazeGame {
         this.elapsedTime = 0;
         this.timerInterval = null;
         this.currentLevel = 1;
+        this.player1Finished = false;
+        this.player2Finished = false;
         
         // Sistemas adicionais
         this.soundManager = new SoundManager();
@@ -43,6 +50,25 @@ class MazeGame {
         this.renderMaze();
         this.startTimer();
         this.updateUI();
+        this.updateModeUI();
+    }
+    
+    updateModeUI() {
+        if (this.gameMode === 'multiplayer') {
+            // Mostra elementos do jogador 2
+            document.getElementById('player2-controls').style.display = 'flex';
+            document.getElementById('player2-legend').style.display = 'flex';
+            document.getElementById('objective-text').textContent = 'Levem os dois eletricistas até o psicólogo evitando as distrações!';
+            document.getElementById('player1-label').textContent = 'Eletricista 1';
+            document.getElementById('instructions-text').textContent = '💡 Jogador 1: WASD ou Setas | Jogador 2: IJKL ou Controle 2';
+        } else {
+            // Esconde elementos do jogador 2
+            document.getElementById('player2-controls').style.display = 'none';
+            document.getElementById('player2-legend').style.display = 'none';
+            document.getElementById('objective-text').textContent = 'Leve o eletricista até o psicólogo evitando as distrações!';
+            document.getElementById('player1-label').textContent = 'Eletricista (Você)';
+            document.getElementById('instructions-text').textContent = '💡 Use as setas do teclado ou controle de Xbox para mover o eletricista';
+        }
     }
     
     // Gera um labirinto estático baseado na imagem de referência
@@ -54,11 +80,17 @@ class MazeGame {
         // Cria o labirinto estático exatamente como na imagem
         this.createStaticMaze();
         
-        // Define posição inicial do jogador (segunda linha, segunda coluna)
+        // Define posição inicial do jogador 1 (segunda linha, segunda coluna)
         this.playerPos = { x: 1, y: 1 };
         this.maze[1][1] = 'player';
         
-        // Define posição do objetivo (psicólogo) - linha 10, coluna 14 (baseado na imagem)
+        // Define posição inicial do jogador 2 (se multiplayer)
+        if (this.gameMode === 'multiplayer') {
+            this.player2Pos = { x: 1, y: 10 };
+            this.maze[10][1] = 'player2';
+        }
+        
+        // Define posição do objetivo (psicólogo) - linha 8, coluna 12 (baseado na imagem)
         this.targetPos = { x: 12, y: 8 };
         this.maze[this.targetPos.y][this.targetPos.x] = 'target';
         
@@ -163,7 +195,7 @@ class MazeGame {
     hasValidPath(startX, startY, targetX, targetY, currentMaze, avoidDistractions = false) {
         const queue = [{ x: startX, y: startY }];
         const visited = new Set();
-        visited.add(`${startX},${startY}`);
+        visited.add(${startX},${startY});
 
         while (queue.length > 0) {
             const { x, y } = queue.shift();
@@ -188,8 +220,8 @@ class MazeGame {
 
                 if (this.isValidCell(newX, newY) && 
                     (cellType === 'path' || cellType === 'target') &&
-                    !visited.has(`${newX},${newY}`)) {
-                    visited.add(`${newX},${newY}`);
+                    !visited.has(${newX},${newY})) {
+                    visited.add(${newX},${newY});
                     queue.push({ x: newX, y: newY });
                 }
             }
@@ -200,7 +232,7 @@ class MazeGame {
     // Encontra o número de caminhos distintos do início ao fim usando BFS
     countDistinctPaths(startX, startY, targetX, targetY, currentMaze, avoidDistractions = false) {
         let pathCount = 0;
-        const queue = [{ x: startX, y: startY, path: new Set([`${startX},${startY}`]) }];
+        const queue = [{ x: startX, y: startY, path: new Set([${startX},${startY}]) }];
         const maxPathsToCount = 10; // Limita o número de caminhos para evitar sobrecarga
 
         while (queue.length > 0 && pathCount < maxPathsToCount) {
@@ -219,7 +251,7 @@ class MazeGame {
             for (const { dx, dy } of neighbors) {
                 const newX = x + dx;
                 const newY = y + dy;
-                const newKey = `${newX},${newY}`;
+                const newKey = ${newX},${newY};
 
                 let cellType = currentMaze[newY][newX];
                 if (avoidDistractions && cellType === 'distraction') {
@@ -241,19 +273,22 @@ class MazeGame {
     // Renderiza o labirinto no DOM
     renderMaze() {
         this.mazeElement.innerHTML = '';
-        this.mazeElement.style.gridTemplateColumns = `repeat(${this.mazeWidth}, 1fr)`;
+        this.mazeElement.style.gridTemplateColumns = repeat(${this.mazeWidth}, 1fr);
         
         for (let y = 0; y < this.mazeHeight; y++) {
             for (let x = 0; x < this.mazeWidth; x++) {
                 const cell = document.createElement('div');
-                cell.className = `maze-cell ${this.maze[y][x]}`;
+                cell.className = maze-cell ${this.maze[y][x]};
                 cell.dataset.x = x;
                 cell.dataset.y = y;
                 
                 // Adiciona ícones
                 switch (this.maze[y][x]) {
                     case 'player':
-                        cell.textContent = '👷‍♂️';
+                        cell.textContent = '👷‍♂';
+                        break;
+                    case 'player2':
+                        cell.textContent = '👷‍♀';
                         break;
                     case 'target':
                         cell.textContent = '🧠';
@@ -277,10 +312,35 @@ class MazeGame {
     // Remove os event listeners
     removeEventListeners() {
         document.removeEventListener("keydown", this.handleKeyDownBound);
-        document.getElementById("up-btn").removeEventListener("click", this.handleUpClickBound);
-        document.getElementById("down-btn").removeEventListener("click", this.handleDownClickBound);
-        document.getElementById("left-btn").removeEventListener("click", this.handleLeftClickBound);
-        document.getElementById("right-btn").removeEventListener("click", this.handleRightClickBound);
+        
+        // Controles jogador 1
+        if (document.getElementById("up-btn")) {
+            document.getElementById("up-btn").removeEventListener("click", this.handleUpClickBound);
+        }
+        if (document.getElementById("down-btn")) {
+            document.getElementById("down-btn").removeEventListener("click", this.handleDownClickBound);
+        }
+        if (document.getElementById("left-btn")) {
+            document.getElementById("left-btn").removeEventListener("click", this.handleLeftClickBound);
+        }
+        if (document.getElementById("right-btn")) {
+            document.getElementById("right-btn").removeEventListener("click", this.handleRightClickBound);
+        }
+        
+        // Controles jogador 2
+        if (document.getElementById("up-btn-p2")) {
+            document.getElementById("up-btn-p2").removeEventListener("click", this.handleUpClickP2Bound);
+        }
+        if (document.getElementById("down-btn-p2")) {
+            document.getElementById("down-btn-p2").removeEventListener("click", this.handleDownClickP2Bound);
+        }
+        if (document.getElementById("left-btn-p2")) {
+            document.getElementById("left-btn-p2").removeEventListener("click", this.handleLeftClickP2Bound);
+        }
+        if (document.getElementById("right-btn-p2")) {
+            document.getElementById("right-btn-p2").removeEventListener("click", this.handleRightClickP2Bound);
+        }
+        
         document.getElementById("restart-btn").removeEventListener("click", this.handleRestartClickBound);
         document.getElementById("pause-btn").removeEventListener("click", this.handlePauseClickBound);
         document.getElementById("play-again-btn").removeEventListener("click", this.handleRestartClickBound);
@@ -300,10 +360,19 @@ class MazeGame {
     setupEventListeners() {
         // Liga os manipuladores de eventos a 'this' para que possam ser removidos
         this.handleKeyDownBound = this.handleKeyDown.bind(this);
-        this.handleUpClickBound = this.movePlayer.bind(this, 0, -1);
-        this.handleDownClickBound = this.movePlayer.bind(this, 0, 1);
-        this.handleLeftClickBound = this.movePlayer.bind(this, -1, 0);
-        this.handleRightClickBound = this.movePlayer.bind(this, 1, 0);
+        
+        // Controles jogador 1
+        this.handleUpClickBound = this.movePlayer.bind(this, 0, -1, 1);
+        this.handleDownClickBound = this.movePlayer.bind(this, 0, 1, 1);
+        this.handleLeftClickBound = this.movePlayer.bind(this, -1, 0, 1);
+        this.handleRightClickBound = this.movePlayer.bind(this, 1, 0, 1);
+        
+        // Controles jogador 2
+        this.handleUpClickP2Bound = this.movePlayer.bind(this, 0, -1, 2);
+        this.handleDownClickP2Bound = this.movePlayer.bind(this, 0, 1, 2);
+        this.handleLeftClickP2Bound = this.movePlayer.bind(this, -1, 0, 2);
+        this.handleRightClickP2Bound = this.movePlayer.bind(this, 1, 0, 2);
+        
         this.handleRestartClickBound = this.restartGame.bind(this);
         this.handlePauseClickBound = this.togglePause.bind(this);
         this.handleResumeClickBound = this.togglePause.bind(this);
@@ -318,15 +387,24 @@ class MazeGame {
         // Controles do teclado
         document.addEventListener('keydown', this.handleKeyDownBound);
         
-        // Controles móveis
+        // Controles móveis jogador 1
         document.getElementById('up-btn').addEventListener('click', this.handleUpClickBound);
         document.getElementById('down-btn').addEventListener('click', this.handleDownClickBound);
         document.getElementById('left-btn').addEventListener('click', this.handleLeftClickBound);
         document.getElementById('right-btn').addEventListener('click', this.handleRightClickBound);
         
+        // Controles móveis jogador 2
+        if (this.gameMode === 'multiplayer') {
+            document.getElementById('up-btn-p2').addEventListener('click', this.handleUpClickP2Bound);
+            document.getElementById('down-btn-p2').addEventListener('click', this.handleDownClickP2Bound);
+            document.getElementById('left-btn-p2').addEventListener('click', this.handleLeftClickP2Bound);
+            document.getElementById('right-btn-p2').addEventListener('click', this.handleRightClickP2Bound);
+        }
+        
         // Botões de ação
         document.getElementById('restart-btn').addEventListener('click', this.handleRestartClickBound);
         document.getElementById('pause-btn').addEventListener('click', this.handlePauseClickBound);
+        document.getElementById('back-to-menu-btn').addEventListener('click', () => this.backToMenu());
         
         // Modais
         document.getElementById('play-again-btn').addEventListener('click', this.handleRestartClickBound);
@@ -341,43 +419,77 @@ class MazeGame {
     handleKeyDown(e) {
         if (this.gameState !== 'playing') return;
         
+        // Controles jogador 1 (WASD e Setas)
         switch (e.key) {
             case 'ArrowUp':
             case 'w':
             case 'W':
                 e.preventDefault();
-                this.movePlayer(0, -1);
+                this.movePlayer(0, -1, 1);
                 break;
             case 'ArrowDown':
             case 's':
             case 'S':
                 e.preventDefault();
-                this.movePlayer(0, 1);
+                this.movePlayer(0, 1, 1);
                 break;
             case 'ArrowLeft':
             case 'a':
             case 'A':
                 e.preventDefault();
-                this.movePlayer(-1, 0);
+                this.movePlayer(-1, 0, 1);
                 break;
             case 'ArrowRight':
             case 'd':
             case 'D':
                 e.preventDefault();
-                this.movePlayer(1, 0);
+                this.movePlayer(1, 0, 1);
                 break;
             case 'Escape':
                 this.togglePause();
                 break;
         }
+        
+        // Controles jogador 2 (IJKL) - apenas em multiplayer
+        if (this.gameMode === 'multiplayer') {
+            switch (e.key) {
+                case 'i':
+                case 'I':
+                    e.preventDefault();
+                    this.movePlayer(0, -1, 2);
+                    break;
+                case 'k':
+                case 'K':
+                    e.preventDefault();
+                    this.movePlayer(0, 1, 2);
+                    break;
+                case 'j':
+                case 'J':
+                    e.preventDefault();
+                    this.movePlayer(-1, 0, 2);
+                    break;
+                case 'l':
+                case 'L':
+                    e.preventDefault();
+                    this.movePlayer(1, 0, 2);
+                    break;
+            }
+        }
     }
     
-    // Move o jogador
-    movePlayer(dx, dy) {
+    // Move o jogador (player: 1 ou 2)
+    movePlayer(dx, dy, player = 1) {
         if (this.gameState !== 'playing') return;
         
-        const newX = this.playerPos.x + dx;
-        const newY = this.playerPos.y + dy;
+        // Verifica se o jogador já terminou (em multiplayer)
+        if (this.gameMode === 'multiplayer') {
+            if (player === 1 && this.player1Finished) return;
+            if (player === 2 && this.player2Finished) return;
+        }
+        
+        const currentPos = player === 1 ? this.playerPos : this.player2Pos;
+        const newX = currentPos.x + dx;
+        const newY = currentPos.y + dy;
         
         // Verifica limites e paredes
         if (newX < 0 || newX >= this.mazeWidth || 
@@ -386,24 +498,52 @@ class MazeGame {
             return;
         }
         
+        // Verifica colisão com outro jogador
+        if (this.gameMode === 'multiplayer') {
+            const otherPos = player === 1 ? this.player2Pos : this.playerPos;
+            if (newX === otherPos.x && newY === otherPos.y) {
+                return; // Não permite ocupar mesma célula
+            }
+        }
+        
         // Remove jogador da posição atual
-        this.maze[this.playerPos.y][this.playerPos.x] = 'path';
+        const playerType = player === 1 ? 'player' : 'player2';
+        this.maze[currentPos.y][currentPos.x] = 'path';
         
         // Atualiza posição
-        this.playerPos.x = newX;
-        this.playerPos.y = newY;
+        currentPos.x = newX;
+        currentPos.y = newY;
         this.moves++;
         
         // Verifica o que está na nova posição
         const cellType = this.maze[newY][newX];
         
         if (cellType === 'target') {
-            this.victory();
+            if (this.gameMode === 'singleplayer') {
+                this.victory();
+            } else {
+                // Em multiplayer, marca jogador como finalizado
+                if (player === 1) {
+                    this.player1Finished = true;
+                } else {
+                    this.player2Finished = true;
+                }
+                
+                // Verifica se ambos terminaram
+                if (this.player1Finished && this.player2Finished) {
+                    this.victory();
+                } else {
+                    // Coloca jogador no objetivo mas mantém o jogo rodando
+                    this.maze[newY][newX] = playerType;
+                    this.updateScore(100);
+                    this.soundManager.play('move');
+                }
+            }
         } else if (cellType === 'distraction') {
-            this.gameOver('distraction');
+            this.gameOver('distraction', player);
         } else {
             // Coloca jogador na nova posição
-            this.maze[newY][newX] = 'player';
+            this.maze[newY][newX] = playerType;
             this.updateScore(10); // Pontos por movimento válido
             this.soundManager.play('move');
         }
@@ -415,35 +555,31 @@ class MazeGame {
     // Atualiza a pontuação
     updateScore(points) {
         this.score += points;
-        this.scoreElement.textContent = this.score;
+        this.updateUI();
     }
     
-    // Atualiza a interface
+    // Atualiza a interface do usuário
     updateUI() {
-        this.movesElement.textContent = this.moves;
         this.scoreElement.textContent = this.score;
+        this.movesElement.textContent = this.moves;
     }
     
-    // Inicia o cronômetro
+    // Inicia o timer
     startTimer() {
-        this.startTime = Date.now();
+        this.startTime = Date.now() - this.elapsedTime;
         this.timerInterval = setInterval(() => {
             if (this.gameState === 'playing') {
                 this.elapsedTime = Date.now() - this.startTime;
-                this.updateTimer();
+                const seconds = Math.floor(this.elapsedTime / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const displaySeconds = seconds % 60;
+                this.timerElement.textContent = 
+                    ${String(minutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')};
             }
         }, 100);
     }
     
-    // Atualiza o cronômetro
-    updateTimer() {
-        const minutes = Math.floor(this.elapsedTime / 60000);
-        const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-        this.timerElement.textContent = 
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // Para o cronômetro
+    // Para o timer
     stopTimer() {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
@@ -459,10 +595,10 @@ class MazeGame {
         // Efeitos sonoros e visuais
         this.soundManager.play('victory');
         
-        // Cria explosão de partículas na posição do objetivo
-        const targetCell = document.querySelector(`[data-x="${this.targetPos.x}"][data-y="${this.targetPos.y}"]`);
-        if (targetCell) {
-            const rect = targetCell.getBoundingClientRect();
+        // Cria explosão de partículas na posição do jogador
+        const playerCell = document.querySelector([data-x="${this.playerPos.x}"][data-y="${this.playerPos.y}"]);
+        if (playerCell) {
+            const rect = playerCell.getBoundingClientRect();
             this.particleSystem.createExplosion(
                 rect.left + rect.width / 2,
                 rect.top + rect.height / 2,
@@ -471,18 +607,18 @@ class MazeGame {
             );
         }
         
-        // Bônus de tempo
-        const timeBonus = Math.max(0, 300 - Math.floor(this.elapsedTime / 1000)) * 10;
-        const moveBonus = Math.max(0, 100 - this.moves) * 5;
-        this.updateScore(timeBonus + moveBonus + 1000);
-        
         // Verifica conquistas
-        this.achievementSystem.checkAchievement('victory');
-        this.achievementSystem.checkAchievement('time', this.elapsedTime);
-        this.achievementSystem.checkAchievement('moves', this.moves);
-        this.achievementSystem.checkAchievement('level', this.currentLevel);
+        this.achievementSystem.checkAchievement("firstVictory");
+        if (this.moves < 50) {
+            this.achievementSystem.checkAchievement("speedRunner");
+        }
         
-        // Atualiza estatísticas do modal
+        // Atualiza modal
+        let victoryMessage = 'Você conseguiu levar o eletricista ao psicólogo!';
+        if (this.gameMode === 'multiplayer') {
+            victoryMessage = 'Vocês conseguiram levar os dois eletricistas ao psicólogo!';
+        }
+        document.getElementById('victory-message').textContent = victoryMessage;
         document.getElementById('victory-score').textContent = this.score;
         document.getElementById('victory-time').textContent = this.timerElement.textContent;
         document.getElementById('victory-moves').textContent = this.moves;
@@ -496,7 +632,7 @@ class MazeGame {
     }
     
     // Game Over
-    gameOver(reason) {
+    gameOver(reason = 'unknown', player = 1) {
         this.gameState = 'gameOver';
         this.stopTimer();
         
@@ -504,7 +640,8 @@ class MazeGame {
         this.soundManager.play('gameOver');
         
         // Cria explosão de partículas na posição do jogador
-        const playerCell = document.querySelector(`[data-x="${this.playerPos.x}"][data-y="${this.playerPos.y}"]`);
+        const currentPos = player === 1 ? this.playerPos : this.player2Pos;
+        const playerCell = document.querySelector([data-x="${currentPos.x}"][data-y="${currentPos.y}"]);
         if (playerCell) {
             const rect = playerCell.getBoundingClientRect();
             this.particleSystem.createExplosion(
@@ -517,7 +654,11 @@ class MazeGame {
         
         let message = 'Tente novamente!';
         if (reason === 'distraction') {
-            message = 'Você foi distraído! Foque no objetivo.';
+            if (this.gameMode === 'multiplayer') {
+                message = Jogador ${player} foi distraído! Foquem no objetivo.;
+            } else {
+                message = 'Você foi distraído! Foque no objetivo.';
+            }
             this.soundManager.play('distraction');
         }
         
@@ -551,6 +692,8 @@ class MazeGame {
         this.score = 0;
         this.moves = 0;
         this.elapsedTime = 0;
+        this.player1Finished = false;
+        this.player2Finished = false;
         
         // Verifica conquista de persistência
         this.achievementSystem.checkAchievement("gameStart");
@@ -562,8 +705,6 @@ class MazeGame {
         this.hideModal(this.gameOverModal);
         this.hideModal(this.victoryModal);
         this.hideModal(this.pauseModal);
-
-
         
         // Para timer anterior e remove event listeners antigos
         this.stopTimer();
@@ -576,6 +717,15 @@ class MazeGame {
         this.renderMaze();
         this.startTimer();
         this.updateUI();
+    }
+    
+    // Volta ao menu
+    backToMenu() {
+        this.removeEventListeners();
+        this.stopTimer();
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('desktop-instructions').style.display = 'none';
+        document.getElementById('mode-selection').style.display = 'flex';
     }
     
     // Pausa/despausa o jogo
@@ -602,9 +752,25 @@ class MazeGame {
     }
 }
 
-// Inicializa o jogo quando a página carrega
+// Função para iniciar o jogo com o modo selecionado
+function startGame(mode) {
+    gameMode = mode;
+    document.getElementById('mode-selection').style.display = 'none';
+    document.getElementById('game-container').style.display = 'grid';
+    document.getElementById('desktop-instructions').style.display = 'block';
+    window.game = new MazeGame(mode);
+}
+
+// Inicializa a tela de seleção quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-    window.game = new MazeGame();
+    // Configura botões de seleção de modo
+    document.getElementById('singleplayer-btn').addEventListener('click', () => {
+        startGame('singleplayer');
+    });
+    
+    document.getElementById('multiplayer-btn').addEventListener('click', () => {
+        startGame('multiplayer');
+    });
 });
 
 // Previne zoom em dispositivos móveis
@@ -648,10 +814,14 @@ document.addEventListener('touchend', (e) => {
         if (Math.abs(diffX) > minSwipeDistance) {
             if (diffX > 0) {
                 // Swipe left
-                document.getElementById('left-btn').click();
+                if (document.getElementById('left-btn')) {
+                    document.getElementById('left-btn').click();
+                }
             } else {
                 // Swipe right
-                document.getElementById('right-btn').click();
+                if (document.getElementById('right-btn')) {
+                    document.getElementById('right-btn').click();
+                }
             }
         }
     } else {
@@ -659,10 +829,14 @@ document.addEventListener('touchend', (e) => {
         if (Math.abs(diffY) > minSwipeDistance) {
             if (diffY > 0) {
                 // Swipe up
-                document.getElementById('up-btn').click();
+                if (document.getElementById('up-btn')) {
+                    document.getElementById('up-btn').click();
+                }
             } else {
                 // Swipe down
-                document.getElementById('down-btn').click();
+                if (document.getElementById('down-btn')) {
+                    document.getElementById('down-btn').click();
+                }
             }
         }
     }

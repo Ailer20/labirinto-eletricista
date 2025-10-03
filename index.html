@@ -7,7 +7,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
+    <!-- Tela de seleção de modo -->
+    <div id="mode-selection" class="mode-selection">
+        <div class="mode-selection-content">
+            <h1>🔌 O Labirinto do Eletricista</h1>
+            <h2>Selecione o modo de jogo</h2>
+            <div class="mode-buttons">
+                <button id="singleplayer-btn" class="mode-btn">
+                    <span class="mode-icon">👷‍♂</span>
+                    <span class="mode-title">Singleplayer</span>
+                    <span class="mode-description">Jogue sozinho</span>
+                </button>
+                <button id="multiplayer-btn" class="mode-btn">
+                    <span class="mode-icon">👷‍♂👷‍♀</span>
+                    <span class="mode-title">Multiplayer</span>
+                    <span class="mode-description">Jogue com um amigo</span>
+                </button>
+            </div>
+            <p class="mode-hint">💡 No modo multiplayer, ambos os jogadores devem chegar ao objetivo!</p>
+        </div>
+    </div>
+
+    <div class="game-container" id="game-container" style="display: none;">
         <!-- Cabeçalho do jogo -->
         <header class="game-header">
             <h1>🔌 O Labirinto do Eletricista</h1>
@@ -27,13 +48,27 @@
 
             <!-- Controles para dispositivos móveis -->
             <div class="mobile-controls">
-                <div class="control-row">
-                    <button id="up-btn" class="control-btn">↑</button>
+                <div class="control-section">
+                    <h4>Jogador 1</h4>
+                    <div class="control-row">
+                        <button id="up-btn" class="control-btn">↑</button>
+                    </div>
+                    <div class="control-row">
+                        <button id="left-btn" class="control-btn">←</button>
+                        <button id="down-btn" class="control-btn">↓</button>
+                        <button id="right-btn" class="control-btn">→</button>
+                    </div>
                 </div>
-                <div class="control-row">
-                    <button id="left-btn" class="control-btn">←</button>
-                    <button id="down-btn" class="control-btn">↓</button>
-                    <button id="right-btn" class="control-btn">→</button>
+                <div class="control-section" id="player2-controls" style="display: none;">
+                    <h4>Jogador 2</h4>
+                    <div class="control-row">
+                        <button id="up-btn-p2" class="control-btn">↑</button>
+                    </div>
+                    <div class="control-row">
+                        <button id="left-btn-p2" class="control-btn">←</button>
+                        <button id="down-btn-p2" class="control-btn">↓</button>
+                        <button id="right-btn-p2" class="control-btn">→</button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -42,14 +77,18 @@
         <aside class="game-sidebar">
             <div class="objective">
                 <h3>🎯 Objetivo</h3>
-                <p>Leve o eletricista até o psicólogo evitando as distrações!</p>
+                <p id="objective-text">Leve o eletricista até o psicólogo evitando as distrações!</p>
             </div>
             
             <div class="legend">
                 <h3>📋 Legenda</h3>
                 <div class="legend-item">
-                    <span class="legend-icon player">🔌</span>
-                    <span>Eletricista (Você)</span>
+                    <span class="legend-icon player">👷‍♂</span>
+                    <span id="player1-label">Eletricista (Você)</span>
+                </div>
+                <div class="legend-item" id="player2-legend" style="display: none;">
+                    <span class="legend-icon player2">👷‍♀</span>
+                    <span>Eletricista 2</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-icon target">🧠</span>
@@ -71,7 +110,8 @@
 
             <div class="game-actions">
                 <button id="restart-btn" class="action-btn">🔄 Reiniciar</button>
-                <button id="pause-btn" class="action-btn">⏸️ Pausar</button>
+                <button id="pause-btn" class="action-btn">⏸ Pausar</button>
+                <button id="back-to-menu-btn" class="action-btn">🏠 Menu</button>
             </div>
         </aside>
 
@@ -96,14 +136,14 @@
         <div id="victory-modal" class="modal hidden">
             <div class="modal-content victory">
                 <h2>🎉 Parabéns!</h2>
-                <p>Você conseguiu levar o eletricista ao psicólogo!</p>
+                <p id="victory-message">Você conseguiu levar o eletricista ao psicólogo!</p>
                 <div class="modal-stats">
                     <p>Pontuação Final: <span id="victory-score">0</span></p>
                     <p>Tempo: <span id="victory-time">00:00</span></p>
                     <p>Movimentos: <span id="victory-moves">0</span></p>
                 </div>
                 <div class="modal-actions">
-                    <button id="next-level-btn" class="action-btn primary">⬆️ Próximo Nível</button>
+                    <button id="next-level-btn" class="action-btn primary">⬆ Próximo Nível</button>
                     <button id="restart-victory-btn" class="action-btn">🔄 Jogar Novamente</button>
                 </div>
             </div>
@@ -112,10 +152,10 @@
         <!-- Modal de Pausa -->
         <div id="pause-modal" class="modal hidden">
             <div class="modal-content">
-                <h2>⏸️ Jogo Pausado</h2>
+                <h2>⏸ Jogo Pausado</h2>
                 <p>O jogo está pausado. Clique em continuar para retomar.</p>
                 <div class="modal-actions">
-                    <button id="resume-btn" class="action-btn primary">▶️ Continuar</button>
+                    <button id="resume-btn" class="action-btn primary">▶ Continuar</button>
                     <button id="restart-pause-btn" class="action-btn">🔄 Reiniciar</button>
                 </div>
             </div>
@@ -123,8 +163,8 @@
     </div>
 
     <!-- Instruções para desktop -->
-    <div class="desktop-instructions">
-        <p>💡 Use as setas do teclado ou controle de Xbox para mover o eletricista</p>
+    <div class="desktop-instructions" id="desktop-instructions" style="display: none;">
+        <p id="instructions-text">💡 Use as setas do teclado ou controle de Xbox para mover o eletricista</p>
         <p>🎮 Controle: D-Pad/Analógico = Movimento | Start = Pausar | Back/X = Reiniciar | A = Confirmar</p>
     </div>
 
